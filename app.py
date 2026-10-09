@@ -37,12 +37,22 @@ def load_model():
     return joblib.load(MODEL_PATH)
 
 
+
 @app.get("/")
 def health_check():
     return jsonify({
         "status": "ok",
         "service": "student-depression-prediction"
     })
+
+
+@app.get("/health")
+def health():
+    return jsonify({
+        "status": "healthy",
+        "service": "student-depression-prediction"
+    })
+
 
 
 @app.post("/predict")
