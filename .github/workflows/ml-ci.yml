@@ -5,18 +5,16 @@ on:
   push:
     branches:
       - main
-
   pull_request:
     branches:
       - main
-
   workflow_dispatch:
 
 permissions:
   contents: read
 
 jobs:
-  train-test-deliver:
+  train-test-containerize:
     runs-on: ubuntu-latest
 
     steps:
@@ -46,6 +44,47 @@ jobs:
       - name: Run prediction application tests
         run: python -m unittest test_app.py -v
 
+      - name: Build Docker image
+        run: docker build -t student-depression-ml:${{ github.sha }} .
+
+      - name: Start Docker container
+        run: |
+          docker run -d \
+            --name student-depression-ml-container \
+            -p 5000:5000 \
+            student-depression-ml:${{ github.sha }}
+
+      - name: Wait for application health
+        run: |
+          for i in {1..15}; do
+            if curl --fail --silent http://localhost:5000/health; then
+              echo "Application is ready."
+              exit 0
+            fi
+            echo "Waiting for application... attempt $i"
+            sleep 2
+          done
+          echo "Application did not become ready."
+          exit 1
+
+      - name: Test prediction endpoint
+        run: |
+          response=$(curl --fail --silent --show-error \
+            -X POST \
+            -H "Content-Type: application/json" \
+            -d '{"Gender":"Male","Age":21,"City":"Ludhiana","Profession":"Student","Academic Pressure":3,"Work Pressure":0,"CGPA":8.0,"Study Satisfaction":3,"Job Satisfaction":0,"Sleep Duration":"7-8 hours","Dietary Habits":"Healthy","Degree":"B.Tech","Have you ever had suicidal thoughts ?":"No","Work/Study Hours":6,"Financial Stress":2,"Family History of Mental Illness":"No"}' \
+            http://localhost:5000/predict)
+          echo "Prediction response: $response"
+          echo "$response" | grep -q '"prediction"'
+
+      - name: Show Docker container logs
+        if: always()
+        run: docker logs student-depression-ml-container || true
+
+      - name: Stop and remove Docker container
+        if: always()
+        run: docker rm -f student-depression-ml-container || true
+
       - name: Prepare release candidate
         run: |
           mkdir -p release_candidate
@@ -57,7 +96,6 @@ jobs:
           cp .dockerignore release_candidate/
           printf "Student Depression Prediction ML Application\nRun: python app.py\nEndpoint: POST /predict\n" > release_candidate/DEPLOYMENT.txt
 
-      
       - name: Upload release candidate
         uses: actions/upload-artifact@v4
         with:
@@ -66,4 +104,3 @@ jobs:
           if-no-files-found: error
           retention-days: 7
           include-hidden-files: true
-  
