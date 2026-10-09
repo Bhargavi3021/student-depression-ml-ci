@@ -10,12 +10,8 @@ class TestPredictionApplication(unittest.TestCase):
 
     def test_health_endpoint(self):
         response = self.client.get("/")
-
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(
-            response.get_json()["status"],
-            "ok"
-        )
+        self.assertEqual(response.get_json()["status"], "ok")
 
     def test_prediction_endpoint(self):
         response = self.client.post(
@@ -44,8 +40,10 @@ class TestPredictionApplication(unittest.TestCase):
 
         result = response.get_json()
 
-        self.assertIn(result["prediction"], ["DEPRESSED", "NOT DEPRESSED"])
-        
+        self.assertIn(
+            result["prediction"],
+            ["DEPRESSED", "NOT DEPRESSED"]
+        )
 
         self.assertIn(
             result["prediction_code"],
@@ -62,7 +60,6 @@ class TestPredictionApplication(unittest.TestCase):
         )
 
         self.assertEqual(response.status_code, 400)
-
         self.assertIn(
             "missing_fields",
             response.get_json()
