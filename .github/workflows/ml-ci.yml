@@ -57,6 +57,7 @@ jobs:
           cp .dockerignore release_candidate/
           printf "Student Depression Prediction ML Application\nRun: python app.py\nEndpoint: POST /predict\n" > release_candidate/DEPLOYMENT.txt
 
+      
       - name: Upload release candidate
         uses: actions/upload-artifact@v4
         with:
@@ -64,3 +65,5 @@ jobs:
           path: release_candidate/
           if-no-files-found: error
           retention-days: 7
+          include-hidden-files: true
+  
