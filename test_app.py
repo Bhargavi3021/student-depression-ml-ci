@@ -44,7 +44,7 @@ class TestPredictionApplication(unittest.TestCase):
 
         result = response.get_json()
 
-        self.assertIn(result["prediction"], ["DEPRESSED","NOT DEPRESSED"])
+        self.assertIn(result["prediction"], ["DEPRESSED", "NOT DEPRESSED"])
         )
 
         self.assertIn(
