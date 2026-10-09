@@ -34,7 +34,6 @@ def load_model():
             "student_depression_model.pkl was not found. "
             "Run the training pipeline first."
         )
-
     return joblib.load(MODEL_PATH)
 
 
@@ -72,7 +71,6 @@ def predict():
     }])
 
     model = load_model()
-
     prediction_code = int(model.predict(sample)[0])
 
     prediction = (
