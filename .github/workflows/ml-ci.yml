@@ -73,7 +73,7 @@ jobs:
             -X POST \
             -H "Content-Type: application/json" \
             -d '{"Gender":"Male","Age":21,"City":"Ludhiana","Profession":"Student","Academic Pressure":3,"Work Pressure":0,"CGPA":8.0,"Study Satisfaction":3,"Job Satisfaction":0,"Sleep Duration":"7-8 hours","Dietary Habits":"Healthy","Degree":"B.Tech","Have you ever had suicidal thoughts ?":"No","Work/Study Hours":6,"Financial Stress":2,"Family History of Mental Illness":"No"}' \
-            http://localhost:5001/predict)
+            http://localhost:5000/predict)
           echo "Prediction response: $response"
           echo "$response" | grep -q '"prediction"'
 
