@@ -12,6 +12,7 @@ on:
 
 permissions:
   contents: read
+  packages: write
 
 jobs:
   train-test-containerize:
@@ -44,8 +45,21 @@ jobs:
       - name: Run prediction application tests
         run: python -m unittest test_app.py -v
 
-      - name: Build Docker image
-        run: docker build -t student-depression-ml:${{ github.sha }} .
+      -       - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and publish Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: |
+            ghcr.io/bhargavi3021/student-depression-ml:${{ github.sha }}
+            ghcr.io/bhargavi3021/student-depression-ml:latest
 
       - name: Start Docker container
         run: |
