@@ -14,16 +14,19 @@ permissions:
   contents: read
   packages: write
 
+env:
+  IMAGE_NAME: ghcr.io/bhargavi3021/student-depression-ml
+
 jobs:
   train-test-containerize:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v7
+        uses: actions/checkout@v4
 
       - name: Set up Python
-        uses: actions/setup-python@v7
+        uses: actions/setup-python@v5
         with:
           python-version: '3.11'
 
@@ -31,7 +34,7 @@ jobs:
         run: python -m pip install --upgrade pip
 
       - name: Install dependencies
-        run: pip install -r requirements.txt
+        run: pip install --retries 5 --timeout 60 -r requirements.txt
 
       - name: Train student depression model
         run: python train_model.py
@@ -45,21 +48,21 @@ jobs:
       - name: Run prediction application tests
         run: python -m unittest test_app.py -v
 
-      -       - name: Log in to GitHub Container Registry
+      - name: Log in to GitHub Container Registry
+        if: github.event_name != 'pull_request'
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build and publish Docker image
+      - name: Build Docker image for testing
         uses: docker/build-push-action@v6
         with:
           context: .
-          push: true
-          tags: |
-            ghcr.io/bhargavi3021/student-depression-ml:${{ github.sha }}
-            ghcr.io/bhargavi3021/student-depression-ml:latest
+          push: false
+          load: true
+          tags: student-depression-ml:${{ github.sha }}
 
       - name: Start Docker container
         run: |
@@ -98,6 +101,16 @@ jobs:
       - name: Stop and remove Docker container
         if: always()
         run: docker rm -f student-depression-ml-container || true
+
+      - name: Publish Docker image to GHCR
+        if: github.event_name != 'pull_request'
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: |
+            ghcr.io/bhargavi3021/student-depression-ml:${{ github.sha }}
+            ghcr.io/bhargavi3021/student-depression-ml:latest
 
       - name: Prepare release candidate
         run: |
