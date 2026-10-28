@@ -21,7 +21,7 @@ spec:
     spec:
       containers:
         - name: student-result-api
-          image: ghcr.io/bhargavi3021/student-depression-ml-ci-main:latest
+          image: ghcr.io/bhargavi3021/student-depression-ml-ci:latest
           imagePullPolicy: Always
           ports:
             - containerPort: 5000
