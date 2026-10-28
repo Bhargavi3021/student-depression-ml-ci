@@ -97,7 +97,7 @@ jobs:
       - name: Push Docker image to GHCR
         if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
         run: |
-          IMAGE_NAME=ghcr.io/${{ github.repository_owner }}/student-result-prediction
+          IMAGE_NAME=ghcr.io/${{ github.repository_owner }}/student-depression-ml-ci-main
           docker tag student-depression-ml:${{ github.sha }} ${IMAGE_NAME}:${{ github.sha }}
           docker tag student-depression-ml:${{ github.sha }} ${IMAGE_NAME}:latest
           docker push ${IMAGE_NAME}:${{ github.sha }}
