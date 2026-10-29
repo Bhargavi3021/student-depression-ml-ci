@@ -1,0 +1,37 @@
+name: Practical 14 - Kubernetes CI-CD
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  deploy-to-minikube:
+    runs-on: self-hosted
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Check Kubernetes connection
+        shell: powershell
+        run: kubectl get nodes
+
+      - name: Deploy Student Depression application
+        shell: powershell
+        run: |
+          kubectl apply -f Practical_13_Kubernetes/deployment.yaml
+          kubectl apply -f Practical_13_Kubernetes/service.yaml
+
+      - name: Wait for deployment rollout
+        shell: powershell
+        run: |
+          kubectl rollout status deployment/student-depression --timeout=180s
+
+      - name: Verify deployment
+        shell: powershell
+        run: |
+          kubectl get deployments
+          kubectl get pods
+          kubectl get services
